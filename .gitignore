@@ -1,6 +1,20 @@
-.venv
-__pycache__
-.pytest_cache
-.ruff_cache
+# Environments
+.venv/
+venv/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Build and distribution
 dist/
 build/
+*.egg-info/
+
+# OS files
+.DS_Store
