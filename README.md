@@ -92,4 +92,4 @@ Use the `Makefile` for standard tasks:
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE.md)
