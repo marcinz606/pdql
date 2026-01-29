@@ -1,6 +1,6 @@
 # pdql
 
-lightweight, Python library that allows you to write SQL queries using familiar Pandas syntax. It functions as a "lazy compiler," building a syntax tree from your operations and transpiling them into standard SQL strings without executing them or requiring a database connection.
+Lightweight Python library that allows you to write SQL queries using familiar Pandas syntax. It functions as a "lazy compiler," building a syntax tree from your operations and transpiling them into standard SQL strings without executing them or requiring a database connection.
 
 ## Installation
 
