@@ -7,9 +7,15 @@ Lightweight Python library that allows you to write SQL queries using familiar P
 Clone the repository and set up the environment using the provided Makefile:
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/marcinz606/pdql
 cd pdql
 make setup
+```
+
+Or install using pip:
+
+```bash
+pip install pdql
 ```
 
 ## Usage
