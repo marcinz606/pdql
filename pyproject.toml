@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pdql"
-version = "0.1.0"
+version = "0.1.1"
 description = "A library to transpile Pandas syntax to SQL strings."
 readme = "README.md"
 requires-python = ">=3.8"
