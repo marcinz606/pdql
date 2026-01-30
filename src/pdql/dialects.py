@@ -1,9 +1,18 @@
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Dict
 
 
 class Dialect(ABC):
     """Abstract base class for SQL dialects."""
+
+    def __init__(self):
+        self.function_mapping: Dict[str, str] = {
+            "mean": "AVG",
+            "sum": "SUM",
+            "count": "COUNT",
+            "min": "MIN",
+            "max": "MAX",
+        }
 
     @abstractmethod
     def quote_identifier(self, name: str) -> str:
@@ -20,14 +29,7 @@ class Dialect(ABC):
         return str(value)
 
     def translate_function(self, name: str) -> str:
-        mapping = {
-            "mean": "AVG",
-            "sum": "SUM",
-            "count": "COUNT",
-            "min": "MIN",
-            "max": "MAX",
-        }
-        return mapping.get(name.lower(), name.upper())
+        return self.function_mapping.get(name.lower(), name.upper())
 
     def translate_op(self, op: str) -> str:
         mapping = {
@@ -53,10 +55,24 @@ class GenericDialect(Dialect):
 
 
 class PostgresDialect(Dialect):
+    def __init__(self):
+        super().__init__()
+        # Example of dialect specific mapping
+        self.function_mapping.update({
+            "len": "LENGTH",
+            "char_length": "LENGTH",
+        })
+
     def quote_identifier(self, name: str) -> str:
         return f'"{name}"'
 
 
 class BigQueryDialect(Dialect):
+    def __init__(self):
+        super().__init__()
+        self.function_mapping.update({
+            "len": "LENGTH",
+        })
+
     def quote_identifier(self, name: str) -> str:
         return f"`{name}`"
