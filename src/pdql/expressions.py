@@ -85,6 +85,27 @@ class SQLColumn(SQLNode):
             return f"{owner}.{col}"
         return col
 
+    def abs(self) -> "SQLFunction":
+        return SQLFunction("ABS", self)
+
+    def ceil(self) -> "SQLFunction":
+        return SQLFunction("CEIL", self)
+
+    def floor(self) -> "SQLFunction":
+        return SQLFunction("FLOOR", self)
+
+    def round(self, n: int = 0) -> "SQLFunction":
+        return SQLFunction("ROUND", [self, n])
+
+    def upper(self) -> "SQLFunction":
+        return SQLFunction("UPPER", self)
+
+    def lower(self) -> "SQLFunction":
+        return SQLFunction("LOWER", self)
+
+    def cast(self, target_type: str) -> "SQLFunction":
+        return SQLFunction("CAST", self, special_format="CAST({args} AS " + target_type + ")")
+
 
 class SQLFunction(SQLNode):
     """Represents a SQL function."""
@@ -94,6 +115,8 @@ class SQLFunction(SQLNode):
         name: str,
         args: Optional[Union[List[Any], Any]] = None,
         alias: Optional[str] = None,
+        is_distinct: bool = False,
+        special_format: Optional[str] = None,
     ):
         self.name = name
         if args is None:
@@ -103,9 +126,10 @@ class SQLFunction(SQLNode):
         else:
             self.args = [args]
         self.alias = alias
+        self.is_distinct = is_distinct
+        self.special_format = special_format
 
     def to_sql(self, dialect: Dialect) -> str:
-        func_name = dialect.translate_function(self.name)
         arg_sqls = []
         for arg in self.args:
             if isinstance(arg, SQLNode):
@@ -115,8 +139,14 @@ class SQLFunction(SQLNode):
             else:
                 arg_sqls.append(dialect.format_value(arg))
 
-        args_str = ", ".join(arg_sqls)
-        sql = f"{func_name}({args_str})"
+        if self.special_format:
+            args_str = ", ".join(arg_sqls)
+            sql = self.special_format.format(args=args_str)
+        else:
+            func_name = dialect.translate_function(self.name)
+            distinct_str = "DISTINCT " if self.is_distinct else ""
+            args_str = ", ".join(arg_sqls)
+            sql = f"{func_name}({distinct_str}{args_str})"
 
         if self.alias:
             return f"{sql} AS {dialect.quote_identifier(self.alias)}"

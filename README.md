@@ -4,16 +4,6 @@ Lightweight Python library that allows you to write SQL queries using familiar P
 
 ## Installation
 
-Clone the repository and set up the environment using the provided Makefile:
-
-```bash
-git clone https://github.com/marcinz606/pdql
-cd pdql
-make setup
-```
-
-Or install using pip:
-
 ```bash
 pip install pdql
 ```
@@ -36,11 +26,34 @@ print(query.to_sql())
 # SELECT * FROM `my_table` WHERE (`my_table`.`age` > 21)
 ```
 
-### Common Table Expressions (CTEs)
+### Advanced Functions & Method Chaining
+
+Most standard SQL functions are available both as standalone functions and as methods on column objects for clean chaining.
 
 ```python
 from pdql.dataframe import SQLDataFrame
+from pdql import functions as f
 
+df = SQLDataFrame("users")
+
+# Method chaining on columns
+query = df[df["email"].lower().starts_with("admin")]
+
+# Complex transformations and types
+query = query.groupby("status").agg({
+    "salary": "mean",
+    "id": "count"
+})
+
+print(query.to_sql())
+# SELECT "status", AVG("salary") AS "salary_mean", COUNT("id") AS "id_count" 
+# FROM "users" 
+# WHERE (LOWER("users"."email") LIKE 'admin%') GROUP BY "status"
+```
+
+### Common Table Expressions (CTEs)
+
+```python
 # Define a subquery
 sub = SQLDataFrame("raw_data")[["id", "val"]]
 sub = sub[sub["val"] > 10]
@@ -49,42 +62,8 @@ sub = sub[sub["val"] > 10]
 df = SQLDataFrame("filtered").with_cte("filtered", sub)
 
 print(df.to_sql())
-# WITH "filtered" AS (SELECT "id", "val" FROM "raw_data" WHERE ("raw_data"."val" > 10)) SELECT * FROM "filtered"
-```
-
-### Subqueries & Aliasing
-
-```python
-inner = SQLDataFrame("orders").groupby("user_id").agg({"amount": "sum"}).alias("totals")
-outer = SQLDataFrame(inner)
-query = outer[outer["amount_sum"] > 1000]
-
-print(query.to_sql())
-# SELECT * FROM (SELECT "user_id", SUM("amount") AS "amount_sum" FROM "orders" GROUP BY "user_id") AS "totals" WHERE ("totals"."amount_sum" > 1000)
-```
-
-### Ordering & Limits
-
-```python
-from pdql.expressions import SQLFunction
-
-# Order by columns or expressions/functions
-query = df.sort_values(["created_at", SQLFunction("rand")], ascending=[False, True]).head(10)
-
-print(query.to_sql())
-# SELECT * FROM "my_table" ORDER BY "my_table"."created_at" DESC, RAND() ASC LIMIT 10
-```
-
-### DML Operations
-
-```python
-df = SQLDataFrame("users")
-
-# Generate INSERT
-insert_sql = df.insert({"name": "Alice", "status": "active"})
-
-# Generate DELETE based on current filters
-delete_sql = df[df["status"] == "inactive"].delete()
+# WITH "filtered" AS (SELECT "id", "val" FROM "raw_data" WHERE ("raw_data"."val" > 10)) 
+# SELECT * FROM "filtered"
 ```
 
 ## Development
